@@ -1,13 +1,15 @@
-// script.js
-
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioPlayer = document.getElementById("audioPlayer");
 audioPlayer.controls = false;  // Disable the native audio controls
 
+let analyserLeft = audioContext.createAnalyser();
+let analyserRight = audioContext.createAnalyser();
+let analyserCenter = audioContext.createAnalyser();
+
 let sourceNode;
 let gainNode = audioContext.createGain();
 
-// Create the EQ filter nodes
+// Create the EQ filter nodes for Mid (Center) channel
 let lowShelfFilterMid = audioContext.createBiquadFilter();
 lowShelfFilterMid.type = "lowshelf";  
 let midBandFilterMid = audioContext.createBiquadFilter();
@@ -15,73 +17,62 @@ midBandFilterMid.type = "peaking";
 let highShelfFilterMid = audioContext.createBiquadFilter();
 highShelfFilterMid.type = "highshelf";  
 
-let lowShelfFilterSide = audioContext.createBiquadFilter();
-lowShelfFilterSide.type = "lowshelf";  
-let midBandFilterSide = audioContext.createBiquadFilter();
-midBandFilterSide.type = "peaking";  
-let highShelfFilterSide = audioContext.createBiquadFilter();
-highShelfFilterSide.type = "highshelf";  
-
-// Set default values for filters
+// Set default values for Mid EQ filters
 lowShelfFilterMid.frequency.value = 100;
 midBandFilterMid.frequency.value = 2500;
 highShelfFilterMid.frequency.value = 10000;
 
-lowShelfFilterSide.frequency.value = 100;
-midBandFilterSide.frequency.value = 2500;
-highShelfFilterSide.frequency.value = 10000;
-
 // EQ Control Elements
 let lowShelfFrequencyControlMid = document.getElementById("low-shelf-frequency-mid");
-let lowShelfGainControlMid = document.getElementById("low-shelf-gain-mid");
 let midBandFrequencyControlMid = document.getElementById("mid-band-frequency-mid");
-let midBandGainControlMid = document.getElementById("mid-band-gain-mid");
-let midBandQControlMid = document.getElementById("mid-band-q-mid");
 let highShelfFrequencyControlMid = document.getElementById("high-shelf-frequency-mid");
-let highShelfGainControlMid = document.getElementById("high-shelf-gain-mid");
 
-let lowShelfFrequencyControlSide = document.getElementById("low-shelf-frequency-side");
-let lowShelfGainControlSide = document.getElementById("low-shelf-gain-side");
-let midBandFrequencyControlSide = document.getElementById("mid-band-frequency-side");
-let midBandGainControlSide = document.getElementById("mid-band-gain-side");
-let midBandQControlSide = document.getElementById("mid-band-q-side");
-let highShelfFrequencyControlSide = document.getElementById("high-shelf-frequency-side");
-let highShelfGainControlSide = document.getElementById("high-shelf-gain-side");
+// Canvas setup for real-time waveform display
+let canvasLeft = document.getElementById("leftWaveform");
+let ctxLeft = canvasLeft.getContext("2d");
 
-// Apply EQ
+let canvasRight = document.getElementById("rightWaveform");
+let ctxRight = canvasRight.getContext("2d");
+
+let canvasCenter = document.getElementById("centerWaveform");
+let ctxCenter = canvasCenter.getContext("2d");
+
+// Update the frequency and gain of filters in real-time
 function applyEQ() {
-    // Apply frequency and gain dynamically for both mid and side filters
     lowShelfFilterMid.frequency.value = lowShelfFrequencyControlMid.value;
-    lowShelfFilterMid.gain.value = lowShelfGainControlMid.value;
-
     midBandFilterMid.frequency.value = midBandFrequencyControlMid.value;
-    midBandFilterMid.gain.value = midBandGainControlMid.value;
-    midBandFilterMid.Q.value = parseFloat(midBandQControlMid.value);
-
     highShelfFilterMid.frequency.value = highShelfFrequencyControlMid.value;
-    highShelfFilterMid.gain.value = highShelfGainControlMid.value;
-
-    lowShelfFilterSide.frequency.value = lowShelfFrequencyControlSide.value;
-    lowShelfFilterSide.gain.value = lowShelfGainControlSide.value;
-
-    midBandFilterSide.frequency.value = midBandFrequencyControlSide.value;
-    midBandFilterSide.gain.value = midBandGainControlSide.value;
-    midBandFilterSide.Q.value = parseFloat(midBandQControlSide.value);
-
-    highShelfFilterSide.frequency.value = highShelfFrequencyControlSide.value;
-    highShelfFilterSide.gain.value = highShelfGainControlSide.value;
-
-    // Update the displayed frequency values for both mid and side bands
-    document.getElementById("low-shelf-frequency-value-mid").textContent = `${lowShelfFrequencyControlMid.value} Hz`;
-    document.getElementById("mid-band-frequency-value-mid").textContent = `${midBandFrequencyControlMid.value} Hz`;
-    document.getElementById("high-shelf-frequency-value-mid").textContent = `${highShelfFrequencyControlMid.value} Hz`;
-
-    document.getElementById("low-shelf-frequency-value-side").textContent = `${lowShelfFrequencyControlSide.value} Hz`;
-    document.getElementById("mid-band-frequency-value-side").textContent = `${midBandFrequencyControlSide.value} Hz`;
-    document.getElementById("high-shelf-frequency-value-side").textContent = `${highShelfFrequencyControlSide.value} Hz`;
 }
 
-// Load and play the audio file
+// Visualize the left, right, and center waveforms in real-time
+function drawWaveform(analyser, ctx, canvas) {
+    let bufferLength = analyser.fftSize;
+    let dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
+
+    // Clear the previous frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+
+    let sliceWidth = canvas.width * 1.0 / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+        let v = dataArray[i] / 128.0; // normalize to [0,1]
+        let y = v * canvas.height / 2;
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+        x += sliceWidth;
+    }
+
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+}
+
+// Load the audio file and start processing
 audioFileInput.addEventListener('change', function(event) {
     let file = event.target.files[0];
     if (file) {
@@ -95,33 +86,29 @@ audioFileInput.addEventListener('change', function(event) {
                 sourceNode.buffer = buffer;
 
                 // Create the Mid-Side encoding (stereo pan for mid/side)
-                let midSideSplitter = audioContext.createChannelSplitter(2);  // Split stereo into 2 channels
-
+                let midSideSplitter = audioContext.createChannelSplitter(2); // Split stereo into 2 channels
                 sourceNode.connect(midSideSplitter);
-                
-                // Mid: sum of left and right channels (mono)
+
+                // Connect the left and right channels to analyzers for waveform visualization
+                midSideSplitter.connect(analyserLeft, 0);
+                midSideSplitter.connect(analyserRight, 1);
+
+                // Process the mid (center) channel
                 let midChannel = audioContext.createGain();
-                midChannel.gain.value = 0.5;  // Set gain to average the left and right channels
-                midSideSplitter.connect(midChannel, 0, 0);  // Connect left channel to mid
-
-                // Side: difference between left and right channels (stereo)
-                let sideChannel = audioContext.createGain();
-                sideChannel.gain.value = 0.5;  // Set gain to average the left and right channels
-                midSideSplitter.connect(sideChannel, 1, 0);  // Connect right channel to side
-
-                // Apply EQ filters to both mid and side channels
+                midChannel.gain.value = 0.5;  // Mid channel
+                midSideSplitter.connect(midChannel, 0, 0);  // Left to mid
                 midChannel.connect(lowShelfFilterMid);
                 lowShelfFilterMid.connect(midBandFilterMid);
                 midBandFilterMid.connect(highShelfFilterMid);
                 highShelfFilterMid.connect(gainNode);
 
-                sideChannel.connect(lowShelfFilterSide);
-                lowShelfFilterSide.connect(midBandFilterSide);
-                midBandFilterSide.connect(highShelfFilterSide);
-                highShelfFilterSide.connect(gainNode);
+                // Process the side (stereo) channel
+                let sideChannel = audioContext.createGain();
+                sideChannel.gain.value = 0.5;  // Side channel
+                midSideSplitter.connect(sideChannel, 1, 0); // Right to side
+                sideChannel.connect(gainNode);
 
-                // Recombine the processed mid and side back into stereo
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(audioContext.destination); // Send to speakers
 
                 // Play the audio manually through Web Audio API
                 sourceNode.start();
@@ -131,9 +118,19 @@ audioFileInput.addEventListener('change', function(event) {
     }
 });
 
+// Update the waveform visualizations in real-time
+function updateVisualizations() {
+    drawWaveform(analyserLeft, ctxLeft, canvasLeft);
+    drawWaveform(analyserRight, ctxRight, canvasRight);
+    drawWaveform(analyserCenter, ctxCenter, canvasCenter);
+}
+
+// Start visualizing and updating the EQ
+setInterval(updateVisualizations, 100); // Update every 100 ms
+
 // Event listeners for EQ control changes
-document.querySelectorAll('.slider').forEach(slider => {
-    slider.addEventListener("input", applyEQ);
-});
+lowShelfFrequencyControlMid.addEventListener("input", applyEQ);
+midBandFrequencyControlMid.addEventListener("input", applyEQ);
+highShelfFrequencyControlMid.addEventListener("input", applyEQ);
 
 applyEQ();
