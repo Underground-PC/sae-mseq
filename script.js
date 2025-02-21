@@ -1,4 +1,3 @@
-// Initialize audio context and setup
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioPlayer = document.getElementById("audioPlayer");
 audioPlayer.controls = false;  // Disable native audio controls
@@ -75,6 +74,23 @@ function applyEQ() {
 
     highShelfFilterSide.frequency.value = highShelfFrequencyControlSide.value;
     highShelfFilterSide.gain.value = highShelfGainControlSide.value;
+
+    // Update the frequency values displayed next to sliders
+    document.getElementById("low-shelf-frequency-value-mid").textContent = `${lowShelfFrequencyControlMid.value} Hz`;
+    document.getElementById("mid-band-frequency-value-mid").textContent = `${midBandFrequencyControlMid.value} Hz`;
+    document.getElementById("high-shelf-frequency-value-mid").textContent = `${highShelfFrequencyControlMid.value} Hz`;
+
+    document.getElementById("low-shelf-frequency-value-side").textContent = `${lowShelfFrequencyControlSide.value} Hz`;
+    document.getElementById("mid-band-frequency-value-side").textContent = `${midBandFrequencyControlSide.value} Hz`;
+    document.getElementById("high-shelf-frequency-value-side").textContent = `${highShelfFrequencyControlSide.value} Hz`;
+
+    document.getElementById("low-shelf-gain-value-mid").textContent = `${lowShelfGainControlMid.value} dB`;
+    document.getElementById("mid-band-gain-value-mid").textContent = `${midBandGainControlMid.value} dB`;
+    document.getElementById("high-shelf-gain-value-mid").textContent = `${highShelfGainControlMid.value} dB`;
+
+    document.getElementById("low-shelf-gain-value-side").textContent = `${lowShelfGainControlSide.value} dB`;
+    document.getElementById("mid-band-gain-value-side").textContent = `${midBandGainControlSide.value} dB`;
+    document.getElementById("high-shelf-gain-value-side").textContent = `${highShelfGainControlSide.value} dB`;
 }
 
 // Visualize the left, right, and center waveforms in real-time
@@ -111,4 +127,69 @@ audioFileInput.addEventListener('change', function(event) {
     if (file) {
         let reader = new FileReader();
         reader.onload = function(e) {
-            audioContext.decodeAudioData(e.target.result, function(buffer
+            audioContext.decodeAudioData(e.target.result, function(buffer) {
+                if (sourceNode) {
+                    sourceNode.disconnect();
+                }
+                sourceNode = audioContext.createBufferSource();
+                sourceNode.buffer = buffer;
+
+                // Create the Mid-Side encoding (stereo pan for mid/side)
+                let midSideSplitter = audioContext.createChannelSplitter(2); // Split stereo into 2 channels
+                sourceNode.connect(midSideSplitter);
+
+                // Connect the left and right channels to analyzers for waveform visualization
+                midSideSplitter.connect(analyserLeft, 0);  // Left channel
+                midSideSplitter.connect(analyserRight, 1); // Right channel
+
+                // Process the mid (center) channel
+                let midChannel = audioContext.createGain();
+                midChannel.gain.value = 0.5;  // Mid channel (mix of left and right)
+                midSideSplitter.connect(midChannel, 0, 0);  // Left to mid
+                midChannel.connect(lowShelfFilterMid);
+                lowShelfFilterMid.connect(midBandFilterMid);
+                midBandFilterMid.connect(highShelfFilterMid);
+                highShelfFilterMid.connect(gainNode);
+
+                // Process the side (stereo) channel
+                let sideChannel = audioContext.createGain();
+                sideChannel.gain.value = 0.5;  // Side channel (stereo separation)
+                midSideSplitter.connect(sideChannel, 1, 0); // Right to side
+                sideChannel.connect(gainNode);
+
+                gainNode.connect(audioContext.destination); // Send to speakers
+
+                // Play the audio manually through Web Audio API
+                sourceNode.start();
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    }
+});
+
+// Update the waveform visualizations in real-time
+function updateVisualizations() {
+    drawWaveform(analyserLeft, ctxLeft, canvasLeft);
+    drawWaveform(analyserRight, ctxRight, canvasRight);
+    drawWaveform(analyserCenter, ctxCenter, canvasCenter);
+}
+
+// Start visualizing and updating the EQ
+setInterval(updateVisualizations, 100); // Update every 100 ms
+
+// Event listeners for EQ control changes
+lowShelfFrequencyControlMid.addEventListener("input", applyEQ);
+midBandFrequencyControlMid.addEventListener("input", applyEQ);
+highShelfFrequencyControlMid.addEventListener("input", applyEQ);
+lowShelfGainControlMid.addEventListener("input", applyEQ);
+midBandGainControlMid.addEventListener("input", applyEQ);
+highShelfGainControlMid.addEventListener("input", applyEQ);
+
+lowShelfFrequencyControlSide.addEventListener("input", applyEQ);
+midBandFrequencyControlSide.addEventListener("input", applyEQ);
+highShelfFrequencyControlSide.addEventListener("input", applyEQ);
+lowShelfGainControlSide.addEventListener("input", applyEQ);
+midBandGainControlSide.addEventListener("input", applyEQ);
+highShelfGainControlSide.addEventListener("input", applyEQ);
+
+applyEQ();
