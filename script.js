@@ -1,4 +1,3 @@
-// Initialize audio context and setup
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioPlayer = document.getElementById("audioPlayer");
 audioPlayer.controls = false;  // Disable native audio controls
