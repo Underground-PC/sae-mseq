@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Mid-Side Parametric EQ</title>
     <style>
-        canvas {
-            width: 100%;
-            height: 200px;
-            margin: 10px 0;
-        }
         .slider-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin: 10px 0;
         }
         .slider {
             width: 300px;
@@ -21,19 +17,10 @@
     </style>
 </head>
 <body>
-    <h1>Interactive Mid-Side Parametric EQ with Real-Time Visualization</h1>
-    
-    <!-- File Input to Upload Audio -->
+    <h1>Interactive Mid-Side Parametric EQ</h1>
+
     <input type="file" id="audioFileInput" />
     <audio id="audioPlayer" controls></audio>
-
-    <h2>Waveforms</h2>
-    <h3>Left Channel</h3>
-    <canvas id="leftWaveform"></canvas>
-    <h3>Right Channel</h3>
-    <canvas id="rightWaveform"></canvas>
-    <h3>Center (Mid) Channel</h3>
-    <canvas id="centerWaveform"></canvas>
 
     <h2>Mid EQ (Center Channel)</h2>
     <div class="eq-control">
@@ -46,6 +33,72 @@
             <label for="low-shelf-gain-mid">Low Shelf Gain (dB): </label>
             <input type="range" id="low-shelf-gain-mid" class="slider" min="-20" max="20" value="0">
             <span id="low-shelf-gain-value-mid">0 dB</span>
+        </div>
+    </div>
+
+    <div class="eq-control">
+        <div class="slider-container">
+            <label for="mid-band-frequency-mid">Mid Band Frequency (Hz): </label>
+            <input type="range" id="mid-band-frequency-mid" class="slider" min="800" max="5000" value="2500">
+            <span id="mid-band-frequency-value-mid">2500 Hz</span>
+        </div>
+        <div class="slider-container">
+            <label for="mid-band-gain-mid">Mid Band Gain (dB): </label>
+            <input type="range" id="mid-band-gain-mid" class="slider" min="-20" max="20" value="0">
+            <span id="mid-band-gain-value-mid">0 dB</span>
+        </div>
+    </div>
+
+    <div class="eq-control">
+        <div class="slider-container">
+            <label for="high-shelf-frequency-mid">High Shelf Frequency (Hz): </label>
+            <input type="range" id="high-shelf-frequency-mid" class="slider" min="5000" max="20000" value="10000">
+            <span id="high-shelf-frequency-value-mid">10000 Hz</span>
+        </div>
+        <div class="slider-container">
+            <label for="high-shelf-gain-mid">High Shelf Gain (dB): </label>
+            <input type="range" id="high-shelf-gain-mid" class="slider" min="-20" max="20" value="0">
+            <span id="high-shelf-gain-value-mid">0 dB</span>
+        </div>
+    </div>
+
+    <h2>Side EQ (Stereo Channel)</h2>
+    <div class="eq-control">
+        <div class="slider-container">
+            <label for="low-shelf-frequency-side">Low Shelf Frequency (Hz): </label>
+            <input type="range" id="low-shelf-frequency-side" class="slider" min="20" max="800" value="100">
+            <span id="low-shelf-frequency-value-side">100 Hz</span>
+        </div>
+        <div class="slider-container">
+            <label for="low-shelf-gain-side">Low Shelf Gain (dB): </label>
+            <input type="range" id="low-shelf-gain-side" class="slider" min="-20" max="20" value="0">
+            <span id="low-shelf-gain-value-side">0 dB</span>
+        </div>
+    </div>
+
+    <div class="eq-control">
+        <div class="slider-container">
+            <label for="mid-band-frequency-side">Mid Band Frequency (Hz): </label>
+            <input type="range" id="mid-band-frequency-side" class="slider" min="800" max="5000" value="2500">
+            <span id="mid-band-frequency-value-side">2500 Hz</span>
+        </div>
+        <div class="slider-container">
+            <label for="mid-band-gain-side">Mid Band Gain (dB): </label>
+            <input type="range" id="mid-band-gain-side" class="slider" min="-20" max="20" value="0">
+            <span id="mid-band-gain-value-side">0 dB</span>
+        </div>
+    </div>
+
+    <div class="eq-control">
+        <div class="slider-container">
+            <label for="high-shelf-frequency-side">High Shelf Frequency (Hz): </label>
+            <input type="range" id="high-shelf-frequency-side" class="slider" min="5000" max="20000" value="10000">
+            <span id="high-shelf-frequency-value-side">10000 Hz</span>
+        </div>
+        <div class="slider-container">
+            <label for="high-shelf-gain-side">High Shelf Gain (dB): </label>
+            <input type="range" id="high-shelf-gain-side" class="slider" min="-20" max="20" value="0">
+            <span id="high-shelf-gain-value-side">0 dB</span>
         </div>
     </div>
 
