@@ -58,39 +58,29 @@ function applyEQ() {
     // Mid (Center) Channel EQ
     lowShelfFilterMid.frequency.value = lowShelfFrequencyControlMid.value;
     lowShelfFilterMid.gain.value = lowShelfGainControlMid.value;
-
     midBandFilterMid.frequency.value = midBandFrequencyControlMid.value;
     midBandFilterMid.gain.value = midBandGainControlMid.value;
-
     highShelfFilterMid.frequency.value = highShelfFrequencyControlMid.value;
     highShelfFilterMid.gain.value = highShelfGainControlMid.value;
 
     // Side (Stereo) Channel EQ
     lowShelfFilterSide.frequency.value = lowShelfFrequencyControlSide.value;
     lowShelfFilterSide.gain.value = lowShelfGainControlSide.value;
-
     midBandFilterSide.frequency.value = midBandFrequencyControlSide.value;
     midBandFilterSide.gain.value = midBandGainControlSide.value;
-
     highShelfFilterSide.frequency.value = highShelfFrequencyControlSide.value;
     highShelfFilterSide.gain.value = highShelfGainControlSide.value;
+}
 
-    // Update the frequency values displayed next to sliders
-    document.getElementById("low-shelf-frequency-value-mid").textContent = `${lowShelfFrequencyControlMid.value} Hz`;
-    document.getElementById("mid-band-frequency-value-mid").textContent = `${midBandFrequencyControlMid.value} Hz`;
-    document.getElementById("high-shelf-frequency-value-mid").textContent = `${highShelfFrequencyControlMid.value} Hz`;
+// Update the frequency and gain labels dynamically
+function updateLabels() {
+    document.getElementById("low-shelf-frequency-value-mid").innerText = `${lowShelfFrequencyControlMid.value} Hz`;
+    document.getElementById("mid-band-frequency-value-mid").innerText = `${midBandFrequencyControlMid.value} Hz`;
+    document.getElementById("high-shelf-frequency-value-mid").innerText = `${highShelfFrequencyControlMid.value} Hz`;
 
-    document.getElementById("low-shelf-frequency-value-side").textContent = `${lowShelfFrequencyControlSide.value} Hz`;
-    document.getElementById("mid-band-frequency-value-side").textContent = `${midBandFrequencyControlSide.value} Hz`;
-    document.getElementById("high-shelf-frequency-value-side").textContent = `${highShelfFrequencyControlSide.value} Hz`;
-
-    document.getElementById("low-shelf-gain-value-mid").textContent = `${lowShelfGainControlMid.value} dB`;
-    document.getElementById("mid-band-gain-value-mid").textContent = `${midBandGainControlMid.value} dB`;
-    document.getElementById("high-shelf-gain-value-mid").textContent = `${highShelfGainControlMid.value} dB`;
-
-    document.getElementById("low-shelf-gain-value-side").textContent = `${lowShelfGainControlSide.value} dB`;
-    document.getElementById("mid-band-gain-value-side").textContent = `${midBandGainControlSide.value} dB`;
-    document.getElementById("high-shelf-gain-value-side").textContent = `${highShelfGainControlSide.value} dB`;
+    document.getElementById("low-shelf-frequency-value-side").innerText = `${lowShelfFrequencyControlSide.value} Hz`;
+    document.getElementById("mid-band-frequency-value-side").innerText = `${midBandFrequencyControlSide.value} Hz`;
+    document.getElementById("high-shelf-frequency-value-side").innerText = `${highShelfFrequencyControlSide.value} Hz`;
 }
 
 // Visualize the left, right, and center waveforms in real-time
@@ -178,18 +168,49 @@ function updateVisualizations() {
 setInterval(updateVisualizations, 100); // Update every 100 ms
 
 // Event listeners for EQ control changes
-lowShelfFrequencyControlMid.addEventListener("input", applyEQ);
-midBandFrequencyControlMid.addEventListener("input", applyEQ);
-highShelfFrequencyControlMid.addEventListener("input", applyEQ);
-lowShelfGainControlMid.addEventListener("input", applyEQ);
-midBandGainControlMid.addEventListener("input", applyEQ);
-highShelfGainControlMid.addEventListener("input", applyEQ);
+lowShelfFrequencyControlMid.addEventListener("input", function() {
+    applyEQ();
+    updateLabels();
+});
+midBandFrequencyControlMid.addEventListener("input", function() {
+    applyEQ();
+    updateLabels();
+});
+highShelfFrequencyControlMid.addEventListener("input", function() {
+    applyEQ();
+    updateLabels();
+});
+lowShelfGainControlMid.addEventListener("input", function() {
+    applyEQ();
+});
+midBandGainControlMid.addEventListener("input", function() {
+    applyEQ();
+});
+highShelfGainControlMid.addEventListener("input", function() {
+    applyEQ();
+});
 
-lowShelfFrequencyControlSide.addEventListener("input", applyEQ);
-midBandFrequencyControlSide.addEventListener("input", applyEQ);
-highShelfFrequencyControlSide.addEventListener("input", applyEQ);
-lowShelfGainControlSide.addEventListener("input", applyEQ);
-midBandGainControlSide.addEventListener("input", applyEQ);
-highShelfGainControlSide.addEventListener("input", applyEQ);
+lowShelfFrequencyControlSide.addEventListener("input", function() {
+    applyEQ();
+    updateLabels();
+});
+midBandFrequencyControlSide.addEventListener("input", function() {
+    applyEQ();
+    updateLabels();
+});
+highShelfFrequencyControlSide.addEventListener("input", function() {
+    applyEQ();
+    updateLabels();
+});
+lowShelfGainControlSide.addEventListener("input", function() {
+    applyEQ();
+});
+midBandGainControlSide.addEventListener("input", function() {
+    applyEQ();
+});
+highShelfGainControlSide.addEventListener("input", function() {
+    applyEQ();
+});
 
 applyEQ();
+updateLabels();
