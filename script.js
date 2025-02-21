@@ -2,7 +2,7 @@
 
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioPlayer = document.getElementById("audioPlayer");
-let audioFileInput = document.getElementById("audioFileInput");
+audioPlayer.controls = false;  // Disable the native audio controls
 
 let analyser = audioContext.createAnalyser();
 let sourceNode;
@@ -26,6 +26,7 @@ let lowShelfFrequencyControl = document.getElementById("low-shelf-frequency");
 let lowShelfGainControl = document.getElementById("low-shelf-gain");
 let midBandFrequencyControl = document.getElementById("mid-band-frequency");
 let midBandGainControl = document.getElementById("mid-band-gain");
+let midBandQControl = document.getElementById("mid-band-q");
 let highShelfFrequencyControl = document.getElementById("high-shelf-frequency");
 let highShelfGainControl = document.getElementById("high-shelf-gain");
 
@@ -41,6 +42,7 @@ function applyEQ() {
 
     midBandFilter.frequency.value = midBandFrequencyControl.value;
     midBandFilter.gain.value = midBandGainControl.value;
+    midBandFilter.Q.value = midBandQControl.value;  // Apply Q factor
 
     highShelfFilter.frequency.value = highShelfFrequencyControl.value;
     highShelfFilter.gain.value = highShelfGainControl.value;
@@ -72,8 +74,7 @@ audioFileInput.addEventListener('change', function(event) {
                 highShelfFilter.connect(gainNode);
                 gainNode.connect(audioContext.destination);
 
-                // Play the audio
-                audioPlayer.src = URL.createObjectURL(file);
+                // Play the audio manually through Web Audio API
                 sourceNode.start();
             });
         };
@@ -86,6 +87,7 @@ lowShelfFrequencyControl.addEventListener("input", applyEQ);
 lowShelfGainControl.addEventListener("input", applyEQ);
 midBandFrequencyControl.addEventListener("input", applyEQ);
 midBandGainControl.addEventListener("input", applyEQ);
+midBandQControl.addEventListener("input", applyEQ);
 highShelfFrequencyControl.addEventListener("input", applyEQ);
 highShelfGainControl.addEventListener("input", applyEQ);
 
