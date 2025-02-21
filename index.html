@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Parametric EQ</title>
     <style>
-        /* Basic styling for the EQ controls */
         .eq-control {
             margin: 10px;
         }
@@ -16,21 +15,40 @@
 </head>
 <body>
     <h1>Interactive Parametric EQ</h1>
-    
+
     <!-- Audio file input -->
     <input type="file" id="audioFileInput" />
     
     <!-- Audio player -->
     <audio id="audioPlayer" controls></audio>
 
-    <!-- EQ Controls -->
+    <!-- Low Shelf EQ -->
+    <div class="eq-control">
+        <label for="low-shelf-frequency">Low Shelf Frequency (Hz): </label>
+        <input type="range" id="low-shelf-frequency" class="slider" min="20" max="800" value="100">
+        <span id="low-shelf-frequency-value">100 Hz</span>
+    </div>
     <div class="eq-control">
         <label for="low-shelf-gain">Low Shelf Gain (-20 to +20 dB): </label>
         <input type="range" id="low-shelf-gain" class="slider" min="-20" max="20" value="0">
     </div>
+
+    <!-- Mid Band EQ -->
+    <div class="eq-control">
+        <label for="mid-band-frequency">Mid Band Frequency (Hz): </label>
+        <input type="range" id="mid-band-frequency" class="slider" min="800" max="5000" value="2500">
+        <span id="mid-band-frequency-value">2500 Hz</span>
+    </div>
     <div class="eq-control">
         <label for="mid-band-gain">Mid Band Gain (-20 to +20 dB): </label>
         <input type="range" id="mid-band-gain" class="slider" min="-20" max="20" value="0">
+    </div>
+
+    <!-- High Shelf EQ -->
+    <div class="eq-control">
+        <label for="high-shelf-frequency">High Shelf Frequency (Hz): </label>
+        <input type="range" id="high-shelf-frequency" class="slider" min="5000" max="20000" value="10000">
+        <span id="high-shelf-frequency-value">10000 Hz</span>
     </div>
     <div class="eq-control">
         <label for="high-shelf-gain">High Shelf Gain (-20 to +20 dB): </label>
