@@ -1,93 +1,60 @@
-// script.js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Parametric EQ</title>
+    <style>
+        .eq-control {
+            margin: 10px;
+        }
+        .slider {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Parametric EQ</h1>
 
-let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-let audioPlayer = document.getElementById("audioPlayer");
-let audioFileInput = document.getElementById("audioFileInput");
+    <!-- Audio file input -->
+    <input type="file" id="audioFileInput" />
+    
+    <!-- Audio player -->
+    <audio id="audioPlayer" controls></audio>
 
-let analyser = audioContext.createAnalyser();
-let sourceNode;
-let gainNode = audioContext.createGain();
+    <!-- Low Shelf EQ -->
+    <div class="eq-control">
+        <label for="low-shelf-frequency">Low Shelf Frequency (Hz): </label>
+        <input type="range" id="low-shelf-frequency" class="slider" min="20" max="800" value="100">
+        <span id="low-shelf-frequency-value">100 Hz</span>
+    </div>
+    <div class="eq-control">
+        <label for="low-shelf-gain">Low Shelf Gain (-20 to +20 dB): </label>
+        <input type="range" id="low-shelf-gain" class="slider" min="-20" max="20" value="0">
+    </div>
 
-// Create the EQ filter nodes
-let lowShelfFilter = audioContext.createBiquadFilter();
-lowShelfFilter.type = "lowshelf";  // Low Shelf Filter (0Hz to 800Hz)
-let midBandFilter = audioContext.createBiquadFilter();
-midBandFilter.type = "peaking";  // Peak Band Filter (800Hz to 5000Hz)
-let highShelfFilter = audioContext.createBiquadFilter();
-highShelfFilter.type = "highshelf";  // High Shelf Filter (5000Hz to 20000Hz)
+    <!-- Mid Band EQ -->
+    <div class="eq-control">
+        <label for="mid-band-frequency">Mid Band Frequency (Hz): </label>
+        <input type="range" id="mid-band-frequency" class="slider" min="800" max="5000" value="2500">
+        <span id="mid-band-frequency-value">2500 Hz</span>
+    </div>
+    <div class="eq-control">
+        <label for="mid-band-gain">Mid Band Gain (-20 to +20 dB): </label>
+        <input type="range" id="mid-band-gain" class="slider" min="-20" max="20" value="0">
+    </div>
 
-// Set default values for filters (we'll update these dynamically based on user input)
-lowShelfFilter.frequency.value = 100;  // Default frequency for low shelf filter
-midBandFilter.frequency.value = 2500;  // Default frequency for mid-band filter
-highShelfFilter.frequency.value = 10000;  // Default frequency for high shelf filter
+    <!-- High Shelf EQ -->
+    <div class="eq-control">
+        <label for="high-shelf-frequency">High Shelf Frequency (Hz): </label>
+        <input type="range" id="high-shelf-frequency" class="slider" min="5000" max="20000" value="10000">
+        <span id="high-shelf-frequency-value">10000 Hz</span>
+    </div>
+    <div class="eq-control">
+        <label for="high-shelf-gain">High Shelf Gain (-20 to +20 dB): </label>
+        <input type="range" id="high-shelf-gain" class="slider" min="-20" max="20" value="0">
+    </div>
 
-// Set up EQ controls
-let lowShelfFrequencyControl = document.getElementById("low-shelf-frequency");
-let lowShelfGainControl = document.getElementById("low-shelf-gain");
-let midBandFrequencyControl = document.getElementById("mid-band-frequency");
-let midBandGainControl = document.getElementById("mid-band-gain");
-let highShelfFrequencyControl = document.getElementById("high-shelf-frequency");
-let highShelfGainControl = document.getElementById("high-shelf-gain");
-
-// Display the frequency values for user feedback
-let lowShelfFrequencyValue = document.getElementById("low-shelf-frequency-value");
-let midBandFrequencyValue = document.getElementById("mid-band-frequency-value");
-let highShelfFrequencyValue = document.getElementById("high-shelf-frequency-value");
-
-function applyEQ() {
-    // Apply the frequency and gain for each filter dynamically
-    lowShelfFilter.frequency.value = lowShelfFrequencyControl.value;
-    lowShelfFilter.gain.value = lowShelfGainControl.value;
-
-    midBandFilter.frequency.value = midBandFrequencyControl.value;
-    midBandFilter.gain.value = midBandGainControl.value;
-
-    highShelfFilter.frequency.value = highShelfFrequencyControl.value;
-    highShelfFilter.gain.value = highShelfGainControl.value;
-
-    // Update the displayed frequency values for each band
-    lowShelfFrequencyValue.textContent = `${lowShelfFrequencyControl.value} Hz`;
-    midBandFrequencyValue.textContent = `${midBandFrequencyControl.value} Hz`;
-    highShelfFrequencyValue.textContent = `${highShelfFrequencyControl.value} Hz`;
-}
-
-// Load the audio file
-audioFileInput.addEventListener('change', function(event) {
-    let file = event.target.files[0];
-    if (file) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            audioContext.decodeAudioData(e.target.result, function(buffer) {
-                // Create the audio source node from the buffer
-                if (sourceNode) {
-                    sourceNode.disconnect();
-                }
-                sourceNode = audioContext.createBufferSource();
-                sourceNode.buffer = buffer;
-
-                // Connect the source -> lowShelf -> midBand -> highShelf -> gain -> audio context
-                sourceNode.connect(lowShelfFilter);
-                lowShelfFilter.connect(midBandFilter);
-                midBandFilter.connect(highShelfFilter);
-                highShelfFilter.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-
-                // Play the audio
-                audioPlayer.src = URL.createObjectURL(file);
-                sourceNode.start();
-            });
-        };
-        reader.readAsArrayBuffer(file);
-    }
-});
-
-// Event listeners for EQ control changes
-lowShelfFrequencyControl.addEventListener("input", applyEQ);
-lowShelfGainControl.addEventListener("input", applyEQ);
-midBandFrequencyControl.addEventListener("input", applyEQ);
-midBandGainControl.addEventListener("input", applyEQ);
-highShelfFrequencyControl.addEventListener("input", applyEQ);
-highShelfGainControl.addEventListener("input", applyEQ);
-
-// Initialize EQ with default values
-applyEQ();
+    <script src="script.js"></script>
+</body>
+</html>
