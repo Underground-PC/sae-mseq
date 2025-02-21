@@ -8,7 +8,7 @@ let analyser = audioContext.createAnalyser();
 let sourceNode;
 let gainNode = audioContext.createGain();
 
-// Create the EQ filter nodes
+// Create the EQ filter nodes for each channel
 let lowShelfFilter = audioContext.createBiquadFilter();
 lowShelfFilter.type = "lowshelf";  // Low Shelf Filter (0Hz to 800Hz)
 let midBandFilter = audioContext.createBiquadFilter();
@@ -35,6 +35,12 @@ let lowShelfFrequencyValue = document.getElementById("low-shelf-frequency-value"
 let midBandFrequencyValue = document.getElementById("mid-band-frequency-value");
 let highShelfFrequencyValue = document.getElementById("high-shelf-frequency-value");
 
+// Mid-Side Processing
+let panNode = audioContext.createStereoPanner();
+let midGainNode = audioContext.createGain();
+let sideGainNode = audioContext.createGain();
+
+// This will apply EQ only to the mid and side channels separately
 function applyEQ() {
     // Apply the frequency and gain for each filter dynamically
     lowShelfFilter.frequency.value = lowShelfFrequencyControl.value;
@@ -44,7 +50,7 @@ function applyEQ() {
     midBandFilter.gain.value = midBandGainControl.value;
 
     // Apply Q factor dynamically to the mid-band filter (peak filter)
-    midBandFilter.Q.value = parseFloat(midBandQControl.value);  // Apply Q factor dynamically
+    midBandFilter.Q.value = parseFloat(midBandQControl.value);
 
     highShelfFilter.frequency.value = highShelfFrequencyControl.value;
     highShelfFilter.gain.value = highShelfGainControl.value;
@@ -69,12 +75,36 @@ audioFileInput.addEventListener('change', function(event) {
                 sourceNode = audioContext.createBufferSource();
                 sourceNode.buffer = buffer;
 
-                // Connect the source -> lowShelf -> midBand -> highShelf -> gain -> audio context
-                sourceNode.connect(lowShelfFilter);
+                // Create the Mid-Side encoding (stereo pan for mid/side)
+                let midSideSplitter = audioContext.createChannelSplitter(2);  // Split stereo into 2 channels
+
+                // Connect the source to the splitter, then split into mid and side
+                sourceNode.connect(midSideSplitter);
+                
+                // Mid: sum of left and right channels (mono)
+                let midChannel = audioContext.createGain();
+                midChannel.gain.value = 0.5;  // Set gain to average the left and right channels
+                midSideSplitter.connect(midChannel, 0, 0);  // Connect left channel to mid
+
+                // Side: difference between left and right channels (stereo)
+                let sideChannel = audioContext.createGain();
+                sideChannel.gain.value = 0.5;  // Set gain to average the left and right channels
+                midSideSplitter.connect(sideChannel, 1, 0);  // Connect right channel to side
+
+                // Apply EQ filters to both mid and side channels
+                midChannel.connect(lowShelfFilter);
                 lowShelfFilter.connect(midBandFilter);
                 midBandFilter.connect(highShelfFilter);
-                highShelfFilter.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                highShelfFilter.connect(midGainNode);
+
+                sideChannel.connect(lowShelfFilter);
+                lowShelfFilter.connect(midBandFilter);
+                midBandFilter.connect(highShelfFilter);
+                highShelfFilter.connect(sideGainNode);
+
+                // Recombine the processed mid and side back into stereo
+                midGainNode.connect(audioContext.destination);
+                sideGainNode.connect(audioContext.destination);
 
                 // Play the audio manually through Web Audio API
                 sourceNode.start();
