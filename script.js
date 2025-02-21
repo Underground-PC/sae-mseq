@@ -8,20 +8,29 @@ let analyser = audioContext.createAnalyser();
 let sourceNode;
 let gainNode = audioContext.createGain();
 
-// Create the EQ (filter) node
-let filterNode = audioContext.createBiquadFilter();
-filterNode.type = "peaking";  // This is for parametric EQ
+// Create the EQ filter nodes
+let lowShelfFilter = audioContext.createBiquadFilter();
+lowShelfFilter.type = "lowshelf";  // Low Shelf Filter (0Hz to 800Hz)
+let midBandFilter = audioContext.createBiquadFilter();
+midBandFilter.type = "peaking";  // Peak Band Filter (800Hz to 5000Hz)
+let highShelfFilter = audioContext.createBiquadFilter();
+highShelfFilter.type = "highshelf";  // High Shelf Filter (5000Hz to 20000Hz)
 
-// Set up the EQ controls
-let frequencyControl = document.getElementById("frequency");
-let gainControl = document.getElementById("gain");
-let qControl = document.getElementById("q-factor");
+// Set initial values for the filters
+lowShelfFilter.frequency.value = 800;  // Set the cutoff frequency for low shelf filter
+midBandFilter.frequency.value = 2500;  // Set the center frequency for the peak filter (middle band)
+highShelfFilter.frequency.value = 5000;  // Set the cutoff frequency for high shelf filter
+
+// Set up EQ controls
+let lowShelfGainControl = document.getElementById("low-shelf-gain");
+let midBandGainControl = document.getElementById("mid-band-gain");
+let highShelfGainControl = document.getElementById("high-shelf-gain");
 
 function applyEQ() {
-    // Apply changes to filter node based on control values
-    filterNode.frequency.value = frequencyControl.value;
-    filterNode.gain.value = gainControl.value;
-    filterNode.Q.value = qControl.value;
+    // Apply the gain for each filter
+    lowShelfFilter.gain.value = lowShelfGainControl.value; 
+    midBandFilter.gain.value = midBandGainControl.value;
+    highShelfFilter.gain.value = highShelfGainControl.value;
 }
 
 // Load the audio file
@@ -37,12 +46,14 @@ audioFileInput.addEventListener('change', function(event) {
                 }
                 sourceNode = audioContext.createBufferSource();
                 sourceNode.buffer = buffer;
-                
-                // Connect to the EQ, gain, and then to the audio context's destination (speakers)
-                sourceNode.connect(filterNode);
-                filterNode.connect(gainNode);
+
+                // Connect the filters in series: source -> lowShelf -> midBand -> highShelf -> gain -> output
+                sourceNode.connect(lowShelfFilter);
+                lowShelfFilter.connect(midBandFilter);
+                midBandFilter.connect(highShelfFilter);
+                highShelfFilter.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
+
                 // Play the audio
                 audioPlayer.src = URL.createObjectURL(file);
                 sourceNode.start();
@@ -53,9 +64,9 @@ audioFileInput.addEventListener('change', function(event) {
 });
 
 // Event listeners for EQ controls
-frequencyControl.addEventListener("input", applyEQ);
-gainControl.addEventListener("input", applyEQ);
-qControl.addEventListener("input", applyEQ);
+lowShelfGainControl.addEventListener("input", applyEQ);
+midBandGainControl.addEventListener("input", applyEQ);
+highShelfGainControl.addEventListener("input", applyEQ);
 
 // Initialize EQ with default values
 applyEQ();

@@ -23,18 +23,18 @@
     <!-- Audio player -->
     <audio id="audioPlayer" controls></audio>
 
-    <!-- Parametric EQ Controls -->
+    <!-- EQ Controls -->
     <div class="eq-control">
-        <label for="frequency">Frequency (Hz): </label>
-        <input type="range" id="frequency" class="slider" min="20" max="2000" value="440">
+        <label for="low-shelf-gain">Low Shelf Gain (-20 to +20 dB): </label>
+        <input type="range" id="low-shelf-gain" class="slider" min="-20" max="20" value="0">
     </div>
     <div class="eq-control">
-        <label for="gain">Gain (dB): </label>
-        <input type="range" id="gain" class="slider" min="-12" max="12" value="0">
+        <label for="mid-band-gain">Mid Band Gain (-20 to +20 dB): </label>
+        <input type="range" id="mid-band-gain" class="slider" min="-20" max="20" value="0">
     </div>
     <div class="eq-control">
-        <label for="q-factor">Q Factor: </label>
-        <input type="range" id="q-factor" class="slider" min="0.1" max="10" value="1">
+        <label for="high-shelf-gain">High Shelf Gain (-20 to +20 dB): </label>
+        <input type="range" id="high-shelf-gain" class="slider" min="-20" max="20" value="0">
     </div>
 
     <script src="script.js"></script>
