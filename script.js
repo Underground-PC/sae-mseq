@@ -42,9 +42,9 @@ function applyEQ() {
 
     midBandFilter.frequency.value = midBandFrequencyControl.value;
     midBandFilter.gain.value = midBandGainControl.value;
-    
-    // Adjust the Q factor for the mid-band filter
-    midBandFilter.Q.value = parseFloat(midBandQControl.value);
+
+    // Ensure the Q factor is applied dynamically based on the slider value
+    midBandFilter.Q.value = parseFloat(midBandQControl.value);  // Apply Q factor dynamically
 
     highShelfFilter.frequency.value = highShelfFrequencyControl.value;
     highShelfFilter.gain.value = highShelfGainControl.value;
