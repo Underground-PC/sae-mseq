@@ -8,57 +8,87 @@ let analyser = audioContext.createAnalyser();
 let sourceNode;
 let gainNode = audioContext.createGain();
 
-// Create the EQ filter nodes for each channel
-let lowShelfFilter = audioContext.createBiquadFilter();
-lowShelfFilter.type = "lowshelf";  // Low Shelf Filter (0Hz to 800Hz)
-let midBandFilter = audioContext.createBiquadFilter();
-midBandFilter.type = "peaking";  // Peak Band Filter (800Hz to 5000Hz)
-let highShelfFilter = audioContext.createBiquadFilter();
-highShelfFilter.type = "highshelf";  // High Shelf Filter (5000Hz to 20000Hz)
+// Create the EQ filter nodes
+let lowShelfFilterMid = audioContext.createBiquadFilter();
+lowShelfFilterMid.type = "lowshelf";  // Low Shelf Filter (0Hz to 800Hz)
+let midBandFilterMid = audioContext.createBiquadFilter();
+midBandFilterMid.type = "peaking";  // Peak Band Filter (800Hz to 5000Hz)
+let highShelfFilterMid = audioContext.createBiquadFilter();
+highShelfFilterMid.type = "highshelf";  // High Shelf Filter (5000Hz to 20000Hz)
+
+let lowShelfFilterSide = audioContext.createBiquadFilter();
+lowShelfFilterSide.type = "lowshelf";  // Low Shelf Filter (0Hz to 800Hz)
+let midBandFilterSide = audioContext.createBiquadFilter();
+midBandFilterSide.type = "peaking";  // Peak Band Filter (800Hz to 5000Hz)
+let highShelfFilterSide = audioContext.createBiquadFilter();
+highShelfFilterSide.type = "highshelf";  // High Shelf Filter (5000Hz to 20000Hz)
 
 // Set default values for filters (we'll update these dynamically based on user input)
-lowShelfFilter.frequency.value = 100;  // Default frequency for low shelf filter
-midBandFilter.frequency.value = 2500;  // Default frequency for mid-band filter
-highShelfFilter.frequency.value = 10000;  // Default frequency for high shelf filter
+lowShelfFilterMid.frequency.value = 100;  // Default frequency for low shelf filter (mid)
+midBandFilterMid.frequency.value = 2500;  // Default frequency for mid-band filter (mid)
+highShelfFilterMid.frequency.value = 10000;  // Default frequency for high shelf filter (mid)
 
-// Set up EQ controls
-let lowShelfFrequencyControl = document.getElementById("low-shelf-frequency");
-let lowShelfGainControl = document.getElementById("low-shelf-gain");
-let midBandFrequencyControl = document.getElementById("mid-band-frequency");
-let midBandGainControl = document.getElementById("mid-band-gain");
-let midBandQControl = document.getElementById("mid-band-q");
-let highShelfFrequencyControl = document.getElementById("high-shelf-frequency");
-let highShelfGainControl = document.getElementById("high-shelf-gain");
+lowShelfFilterSide.frequency.value = 100;  // Default frequency for low shelf filter (side)
+midBandFilterSide.frequency.value = 2500;  // Default frequency for mid-band filter (side)
+highShelfFilterSide.frequency.value = 10000;  // Default frequency for high shelf filter (side)
+
+// Set up EQ controls for mid (center) and side (stereo) channels
+let lowShelfFrequencyControlMid = document.getElementById("low-shelf-frequency-mid");
+let lowShelfGainControlMid = document.getElementById("low-shelf-gain-mid");
+let midBandFrequencyControlMid = document.getElementById("mid-band-frequency-mid");
+let midBandGainControlMid = document.getElementById("mid-band-gain-mid");
+let midBandQControlMid = document.getElementById("mid-band-q-mid");
+let highShelfFrequencyControlMid = document.getElementById("high-shelf-frequency-mid");
+let highShelfGainControlMid = document.getElementById("high-shelf-gain-mid");
+
+let lowShelfFrequencyControlSide = document.getElementById("low-shelf-frequency-side");
+let lowShelfGainControlSide = document.getElementById("low-shelf-gain-side");
+let midBandFrequencyControlSide = document.getElementById("mid-band-frequency-side");
+let midBandGainControlSide = document.getElementById("mid-band-gain-side");
+let midBandQControlSide = document.getElementById("mid-band-q-side");
+let highShelfFrequencyControlSide = document.getElementById("high-shelf-frequency-side");
+let highShelfGainControlSide = document.getElementById("high-shelf-gain-side");
 
 // Display the frequency values for user feedback
-let lowShelfFrequencyValue = document.getElementById("low-shelf-frequency-value");
-let midBandFrequencyValue = document.getElementById("mid-band-frequency-value");
-let highShelfFrequencyValue = document.getElementById("high-shelf-frequency-value");
+let lowShelfFrequencyValueMid = document.getElementById("low-shelf-frequency-value-mid");
+let midBandFrequencyValueMid = document.getElementById("mid-band-frequency-value-mid");
+let highShelfFrequencyValueMid = document.getElementById("high-shelf-frequency-value-mid");
 
-// Mid-Side Processing
-let panNode = audioContext.createStereoPanner();
-let midGainNode = audioContext.createGain();
-let sideGainNode = audioContext.createGain();
+let lowShelfFrequencyValueSide = document.getElementById("low-shelf-frequency-value-side");
+let midBandFrequencyValueSide = document.getElementById("mid-band-frequency-value-side");
+let highShelfFrequencyValueSide = document.getElementById("high-shelf-frequency-value-side");
 
-// This will apply EQ only to the mid and side channels separately
+// Apply EQ
 function applyEQ() {
-    // Apply the frequency and gain for each filter dynamically
-    lowShelfFilter.frequency.value = lowShelfFrequencyControl.value;
-    lowShelfFilter.gain.value = lowShelfGainControl.value;
+    // Apply frequency and gain dynamically for both mid and side filters
+    lowShelfFilterMid.frequency.value = lowShelfFrequencyControlMid.value;
+    lowShelfFilterMid.gain.value = lowShelfGainControlMid.value;
 
-    midBandFilter.frequency.value = midBandFrequencyControl.value;
-    midBandFilter.gain.value = midBandGainControl.value;
+    midBandFilterMid.frequency.value = midBandFrequencyControlMid.value;
+    midBandFilterMid.gain.value = midBandGainControlMid.value;
+    midBandFilterMid.Q.value = parseFloat(midBandQControlMid.value);
 
-    // Apply Q factor dynamically to the mid-band filter (peak filter)
-    midBandFilter.Q.value = parseFloat(midBandQControl.value);
+    highShelfFilterMid.frequency.value = highShelfFrequencyControlMid.value;
+    highShelfFilterMid.gain.value = highShelfGainControlMid.value;
 
-    highShelfFilter.frequency.value = highShelfFrequencyControl.value;
-    highShelfFilter.gain.value = highShelfGainControl.value;
+    lowShelfFilterSide.frequency.value = lowShelfFrequencyControlSide.value;
+    lowShelfFilterSide.gain.value = lowShelfGainControlSide.value;
 
-    // Update the displayed frequency values for each band
-    lowShelfFrequencyValue.textContent = `${lowShelfFrequencyControl.value} Hz`;
-    midBandFrequencyValue.textContent = `${midBandFrequencyControl.value} Hz`;
-    highShelfFrequencyValue.textContent = `${highShelfFrequencyControl.value} Hz`;
+    midBandFilterSide.frequency.value = midBandFrequencyControlSide.value;
+    midBandFilterSide.gain.value = midBandGainControlSide.value;
+    midBandFilterSide.Q.value = parseFloat(midBandQControlSide.value);
+
+    highShelfFilterSide.frequency.value = highShelfFrequencyControlSide.value;
+    highShelfFilterSide.gain.value = highShelfGainControlSide.value;
+
+    // Update the displayed frequency values for both mid and side bands
+    lowShelfFrequencyValueMid.textContent = `${lowShelfFrequencyControlMid.value} Hz`;
+    midBandFrequencyValueMid.textContent = `${midBandFrequencyControlMid.value} Hz`;
+    highShelfFrequencyValueMid.textContent = `${highShelfFrequencyControlMid.value} Hz`;
+
+    lowShelfFrequencyValueSide.textContent = `${lowShelfFrequencyControlSide.value} Hz`;
+    midBandFrequencyValueSide.textContent = `${midBandFrequencyControlSide.value} Hz`;
+    highShelfFrequencyValueSide.textContent = `${highShelfFrequencyControlSide.value} Hz`;
 }
 
 // Load the audio file
@@ -92,19 +122,18 @@ audioFileInput.addEventListener('change', function(event) {
                 midSideSplitter.connect(sideChannel, 1, 0);  // Connect right channel to side
 
                 // Apply EQ filters to both mid and side channels
-                midChannel.connect(lowShelfFilter);
-                lowShelfFilter.connect(midBandFilter);
-                midBandFilter.connect(highShelfFilter);
-                highShelfFilter.connect(midGainNode);
+                midChannel.connect(lowShelfFilterMid);
+                lowShelfFilterMid.connect(midBandFilterMid);
+                midBandFilterMid.connect(highShelfFilterMid);
+                highShelfFilterMid.connect(gainNode);
 
-                sideChannel.connect(lowShelfFilter);
-                lowShelfFilter.connect(midBandFilter);
-                midBandFilter.connect(highShelfFilter);
-                highShelfFilter.connect(sideGainNode);
+                sideChannel.connect(lowShelfFilterSide);
+                lowShelfFilterSide.connect(midBandFilterSide);
+                midBandFilterSide.connect(highShelfFilterSide);
+                highShelfFilterSide.connect(gainNode);
 
                 // Recombine the processed mid and side back into stereo
-                midGainNode.connect(audioContext.destination);
-                sideGainNode.connect(audioContext.destination);
+                gainNode.connect(audioContext.destination);
 
                 // Play the audio manually through Web Audio API
                 sourceNode.start();
@@ -115,13 +144,21 @@ audioFileInput.addEventListener('change', function(event) {
 });
 
 // Event listeners for EQ control changes
-lowShelfFrequencyControl.addEventListener("input", applyEQ);
-lowShelfGainControl.addEventListener("input", applyEQ);
-midBandFrequencyControl.addEventListener("input", applyEQ);
-midBandGainControl.addEventListener("input", applyEQ);
-midBandQControl.addEventListener("input", applyEQ);
-highShelfFrequencyControl.addEventListener("input", applyEQ);
-highShelfGainControl.addEventListener("input", applyEQ);
+lowShelfFrequencyControlMid.addEventListener("input", applyEQ);
+lowShelfGainControlMid.addEventListener("input", applyEQ);
+midBandFrequencyControlMid.addEventListener("input", applyEQ);
+midBandGainControlMid.addEventListener("input", applyEQ);
+midBandQControlMid.addEventListener("input", applyEQ);
+highShelfFrequencyControlMid.addEventListener("input", applyEQ);
+highShelfGainControlMid.addEventListener("input", applyEQ);
+
+lowShelfFrequencyControlSide.addEventListener("input", applyEQ);
+lowShelfGainControlSide.addEventListener("input", applyEQ);
+midBandFrequencyControlSide.addEventListener("input", applyEQ);
+midBandGainControlSide.addEventListener("input", applyEQ);
+midBandQControlSide.addEventListener("input", applyEQ);
+highShelfFrequencyControlSide.addEventListener("input", applyEQ);
+highShelfGainControlSide.addEventListener("input", applyEQ);
 
 // Initialize EQ with default values
 applyEQ();
