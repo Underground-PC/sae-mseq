@@ -9,29 +9,29 @@ let gainNode = audioContext.createGain();
 
 // Create the EQ filter nodes
 let lowShelfFilterMid = audioContext.createBiquadFilter();
-lowShelfFilterMid.type = "lowshelf";  // Low Shelf for Mid (0Hz to 800Hz)
+lowShelfFilterMid.type = "lowshelf";  
 let midBandFilterMid = audioContext.createBiquadFilter();
-midBandFilterMid.type = "peaking";  // Peak Band for Mid (800Hz to 5000Hz)
+midBandFilterMid.type = "peaking";  
 let highShelfFilterMid = audioContext.createBiquadFilter();
-highShelfFilterMid.type = "highshelf";  // High Shelf for Mid (5000Hz to 20000Hz)
+highShelfFilterMid.type = "highshelf";  
 
 let lowShelfFilterSide = audioContext.createBiquadFilter();
-lowShelfFilterSide.type = "lowshelf";  // Low Shelf for Side (0Hz to 800Hz)
+lowShelfFilterSide.type = "lowshelf";  
 let midBandFilterSide = audioContext.createBiquadFilter();
-midBandFilterSide.type = "peaking";  // Peak Band for Side (800Hz to 5000Hz)
+midBandFilterSide.type = "peaking";  
 let highShelfFilterSide = audioContext.createBiquadFilter();
-highShelfFilterSide.type = "highshelf";  // High Shelf for Side (5000Hz to 20000Hz)
+highShelfFilterSide.type = "highshelf";  
 
-// Set default values for filters (we'll update these dynamically based on user input)
-lowShelfFilterMid.frequency.value = 100;  
-midBandFilterMid.frequency.value = 2500;  
-highShelfFilterMid.frequency.value = 10000;  
+// Set default values for filters
+lowShelfFilterMid.frequency.value = 100;
+midBandFilterMid.frequency.value = 2500;
+highShelfFilterMid.frequency.value = 10000;
 
-lowShelfFilterSide.frequency.value = 100;  
-midBandFilterSide.frequency.value = 2500;  
-highShelfFilterSide.frequency.value = 10000;  
+lowShelfFilterSide.frequency.value = 100;
+midBandFilterSide.frequency.value = 2500;
+highShelfFilterSide.frequency.value = 10000;
 
-// Set up EQ controls for mid (center) and side (stereo) channels
+// EQ Control Elements
 let lowShelfFrequencyControlMid = document.getElementById("low-shelf-frequency-mid");
 let lowShelfGainControlMid = document.getElementById("low-shelf-gain-mid");
 let midBandFrequencyControlMid = document.getElementById("mid-band-frequency-mid");
@@ -48,6 +48,7 @@ let midBandQControlSide = document.getElementById("mid-band-q-side");
 let highShelfFrequencyControlSide = document.getElementById("high-shelf-frequency-side");
 let highShelfGainControlSide = document.getElementById("high-shelf-gain-side");
 
+// Apply EQ
 function applyEQ() {
     // Apply frequency and gain dynamically for both mid and side filters
     lowShelfFilterMid.frequency.value = lowShelfFrequencyControlMid.value;
@@ -80,7 +81,7 @@ function applyEQ() {
     document.getElementById("high-shelf-frequency-value-side").textContent = `${highShelfFrequencyControlSide.value} Hz`;
 }
 
-// Load the audio file
+// Load and play the audio file
 audioFileInput.addEventListener('change', function(event) {
     let file = event.target.files[0];
     if (file) {
